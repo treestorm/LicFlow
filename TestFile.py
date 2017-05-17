@@ -1,12 +1,22 @@
 import pandas as pd
 import numpy as np
-import timeit
-np.random.seed(0)
-import datetime
-import os
-#rng = pd.date_range(start='2011/09/09 10:00:00', end='2011/09/09 12:00:00', freq='50 ms')
-#print rng
-st = "2016-04-01 00:00:00.000"
+from scipy import integrate
+import matplotlib.pyplot as plt
 
-dt = datetime.datetime.strptime(st, '%Y-%m-%d %H:%M:%S.%f')
-print dt.strftime('%Y-%m-%d')
+rng = pd.date_range('1/1/2011', periods=360, freq='1 min')
+dat = pd.DataFrame(np.random.rand(len(rng)))
+dat['time'] = rng
+dat = dat.set_index(pd.to_datetime(dat['time']))
+del dat['time']
+dat.columns = ['values']
+
+# now check how to integrate the data
+
+df_int = integrate.cumtrapz(dat['values'], dat.index.astype(np.int64) / 10**9, initial=0)
+
+dat = pd.DataFrame(np.empty(len(rng)))
+dat['time'] = rng
+dat['integral'] = df_int
+dat.plot(x='time', y='integral')
+plt.show()
+#dat['integral'] = df_int
